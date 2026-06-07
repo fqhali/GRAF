@@ -125,9 +125,17 @@ BFS adalah algoritma penelusuran yang bekerja secara melebar. Algoritma ini meng
 - **Analogi Nyata:** Seperti riak air yang menyebar secara melingkar saat Anda menjatuhkan batu ke dalam kolam tenang, atau seperti proses pelacakan kontak erat suatu virus.
 - **Struktur Data Pendukung:** BFS menggunakan struktur data **Queue (Antrean - FIFO: First In First Out)** untuk melacak vertex mana yang harus dikunjungi berikutnya, serta sebuah array/vector boolean `visited` untuk mencatat vertex yang sudah pernah dikunjungi.
 - **Langkah Kerja:**
-  1. Masukkan vertex awal ke dalam Queue dan tandai sebagai `visited`.
+  1. Masukkan vertex awal ke dalam _Queue_ dan tandai sebagai `visited`.
   2. Selama _Queue_ tidak kosong, keluarkan vertex dari depan antrean (sebut saja vertex $u$).
   3. Periksa semua tetangga dari vertex $u$. Jika tetangga tersebut belum ditandai `visited`, masukkan ke dalam Queue dan tandai sebagai `visited`.
   4. Ulangi langkah ini hingga _Queue_ kosong.
   
-
+**B. Depth-First Search (DFS)**
+DFS adalah algoritma penelusuran yang bekerja secara mendalam. Algoritma ini berjalan menelusuri satu jalur sedalam mungkin hingga mencapai titik buntu, lalu melakukan backtrack (kembali mundur) untuk mencoba jalur alternatif yang belum dieksplorasi.
+- **Analogi Nyata:** Seperti Anda mencari jalan keluar di dalam labirin (maze). Anda akan terus berjalan menyusuri satu lorong sampai mentok, lalu kembali ke persimpangan terakhir untuk mencoba lorong lainnya.
+- **Struktur Data Pendukung:** DFS secara alami menggunakan struktur data **Stack (Tumpukan - LIFO: Last In First Out)**. Dalam praktiknya, DFS paling sering diimplementasikan menggunakan fungsi Rekursi karena tumpukan fungsi memori komputer secara otomatis bertindak sebagai _Stack_.
+- **Langkah Kerja:**
+  1. **Masukkan vertex awal ke dalam _Queue_ dan tandai sebagai `visited`.**
+  2. Cari tetangga dari vertex saat ini yang belum dikunjungi.
+  3. Secara rekursif, panggil fungsi DFS untuk vertex tetangga tersebut.
+  4. Jika semua tetangga dari vertex saat ini sudah dikunjungi, fungsi akan selesai dan otomatis mundur (_backtrack_) ke vertex sebelumnya.
