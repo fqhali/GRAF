@@ -100,6 +100,7 @@ int main() {
     return 0;
 }
 ```
+OUTPUT:
 ```
 === REPRESENTASI ADJACENCY LIST ===
 Vertex 0 terhubung dengan: [ 1 2 ]
