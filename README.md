@@ -1,4 +1,4 @@
-# Panduan Lengkap Teori Graf: Struktur, Traversal, Shortest Path, dan Minimum Spanning Tree
+# Panduan Lengkap Teori Graf
 
 Selamat datang di panduan komprehensif mengenai **Graf (Graph)**. Dokumen ini dirancang untuk membawa Anda memahami konsep graf dari dasar (pengertian) hingga implementasi algoritma tingkat lanjut seperti *Shortest Path* dan *Minimum Spanning Tree*. Seluruh materi disajikan secara mendalam dengan pendekatan yang natural, runtut, dan mudah dipahami.
 
