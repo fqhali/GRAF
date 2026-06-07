@@ -99,3 +99,11 @@ int main() {
 
     return 0;
 }
+```
+```
+=== REPRESENTASI ADJACENCY LIST ===
+Vertex 0 terhubung dengan: [ 1 2 ]
+Vertex 1 terhubung dengan: [ 0 2 3 ]
+Vertex 2 terhubung dengan: [ 0 1 ]
+Vertex 3 terhubung dengan: [ 1 ]
+```
