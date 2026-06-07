@@ -116,3 +116,18 @@ Penjelasan Kode Langkah demi Langkah:
 4. `printGraph():` Kita menggunakan perulangan bersarang (nested loop). Perulangan pertama menyusuri setiap vertex utama, dan perulangan kedua (berbasis range-based for loop) mencetak seluruh tetangga yang terhubung dengan vertex tersebut.
 ---
 
+## 3. Algoritma Traversal Graf (Penelusuran Graf)
+
+Traversal graf adalah proses mengunjungi setiap vertex dalam graf secara terstruktur dan memastikan tidak ada vertex yang dikunjungi lebih dari sekali (menghindari perulangan tanpa akhir akibat adanya siklus/loop pada graf). Ada dua algoritma utama yang sangat fundamental:
+
+**A. Breadth-First Search (BFS)**
+BFS adalah algoritma penelusuran yang bekerja secara melebar. Algoritma ini mengunjungi semua vertex tetangga terdekat terlebih dahulu sebelum melangkah ke level yang lebih dalam.
+- **Analogi Nyata:** Seperti riak air yang menyebar secara melingkar saat Anda menjatuhkan batu ke dalam kolam tenang, atau seperti proses pelacakan kontak erat suatu virus.
+- **Struktur Data Pendukung:** BFS menggunakan struktur data **Queue (Antrean - FIFO: First In First Out)** untuk melacak vertex mana yang harus dikunjungi berikutnya, serta sebuah array/vector boolean `visited` untuk mencatat vertex yang sudah pernah dikunjungi.
+- **Langkah Kerja:**
+  1. Masukkan vertex awal ke dalam Queue dan tandai sebagai `visited`.
+  2. Selama _Queue_ tidak kosong, keluarkan vertex dari depan antrean (sebut saja vertex $u$).
+  3. Periksa semua tetangga dari vertex $u$. Jika tetangga tersebut belum ditandai `visited`, masukkan ke dalam Queue dan tandai sebagai `visited`.
+  4. Ulangi langkah ini hingga _Queue_ kosong.
+  
+
