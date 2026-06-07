@@ -321,3 +321,294 @@ Jalur ditambahkan ke MST membawa Vertex 3 dengan bobot jalur: 6
 Total Bobot Akhir Minimum Spanning Tree = 16
 =========================================
 ```
+
+---
+
+## Studi Kasus
+
+# Studi Kasus Eksperimen Graf: Pengembangan Infrastruktur "Smart City"
+
+Dokumen ini berisi simulasi studi kasus nyata yang menerapkan dua konsep fundamental dalam teori graf, yaitu **Minimum Spanning Tree (MST)** dan **Shortest Path (Jalur Terpendek)** pada sebuah model jaringan perkotaan terpadu.
+
+---
+
+## 1. Deskripsi Studi Kasus
+
+Bayangkan Anda adalah seorang Kepala Penasihat Teknologi yang diminta untuk merancang infrastruktur digital dan rute darurat di sebuah area perkotaan baru yang memiliki **5 titik lokasi penting (Vertex)**:
+* **Vertex 0:** Pusat Data Kebon (Pusat server dan kendali kota)
+* **Vertex 1:** Sektor Perumahan Mukti (Area pemukiman warga)
+* **Vertex 2:** Kawasan Industri Kreatif (Pusat pabrik dan kantor startup)
+* **Vertex 3:** Pusat Pemerintahan & Balai Kota (Gedung pelayanan publik)
+* **Vertex 4:** Hub Transportasi Terpadu (Stasiun kereta cepat & terminal bus)
+
+Di antara kelima lokasi tersebut, tim tata kota telah memetakan **7 opsi jalur koneksi potensial (Edge)** yang bisa dibangun. Setiap jalur memiliki nilai **bobot** tertentu yang mencerminkan dua metrik sekaligus: **biaya pembangunan (dalam miliar Rupiah)** dan **jarak fisik (dalam kilometer)**.
+
+### Detail Peta Jaringan (Graf Berbobot):
+1. Jalur (0 - 1) $\rightarrow$ Bobot: **2**
+2. Jalur (0 - 3) $\rightarrow$ Bobot: **6**
+3. Jalur (1 - 2) $\rightarrow$ Bobot: **3**
+4. Jalur (1 - 3) $\rightarrow$ Bobot: **8**
+5. Jalur (1 - 4) $\rightarrow$ Bobot: **5**
+6. Jalur (2 - 4) $\rightarrow$ Bobot: **7**
+7. Jalur (3 - 4) $\rightarrow$ Bobot: **9**
+
+
+
+---
+
+## 2. Dua Skenario Optimasi Masalah
+
+Dari peta induk graf di atas, kita dihadapkan pada dua instruksi pembangunan dengan target yang bertolak belakang:
+
+### Masalah 1: Penggelaran Kabel Fiber Optic Internet (Kasus MST)
+* **Tujuan:** Memasang jaringan kabel internet bawah tanah agar **kelima lokasi saling terhubung satu sama lain** ke dalam satu jaringan interkoneksi global. 
+* **Batasan:** Tidak boleh ada jalur kabel yang memutar membentuk lingkaran (siklus) karena mubazir, dan total biaya pembangunan harus **seminimal mungkin**.
+* **Solusi Graf:** Masalah konektivitas menyeluruh dengan total bobot terkecil ini diselesaikan menggunakan **Minimum Spanning Tree (Algoritma Prim)**.
+
+### Masalah 2: Jalur Evakuasi / Ambulans Darurat (Kasus Shortest Path)
+* **Tujuan:** Terjadi situasi darurat di **Hub Transportasi Terpadu (Vertex 4)**. Ambulans medis yang bersiap di **Pusat Data Kebon (Vertex 0)** harus tiba di lokasi dalam waktu **paling cepat (rute terpendek)**.
+* **Batasan:** Tidak memedulikan interkoneksi gedung lain. Fokus murni mencari akumulasi jarak kilometer terkecil dari titik asal menuju titik tujuan.
+* **Solusi Graf:** Masalah pencarian rute titik-ke-titik (*point-to-point*) pada graf berbobot positif ini diselesaikan menggunakan **Shortest Path (Algoritma Dijkstra)**.
+
+---
+
+## 3. Implementasi Program Lengkap (C++)
+
+Berikut adalah kode program C++ terstruktur yang memodelkan graf di atas dan langsung menyelesaikan kedua masalah tersebut:
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <string>
+
+using namespace std;
+
+// Struktur data untuk merepresentasikan jalur berbobot
+// pair.first -> Bobot (Jarak/Biaya), pair.second -> Vertex Tujuan
+typedef pair<int, int> pii;
+
+class SmartCityGraph {
+private:
+    int V; // Jumlah lokasi (Vertex)
+    vector<vector<pii>> adj; // Adjacency List berbobot
+    vector<string> locationNames; // Menyimpan nama asli dari setiap indeks vertex
+
+public:
+    // Konstruktor
+    SmartCityGraph(int V) {
+        this->V = V;
+        adj.resize(V);
+        locationNames = {
+            "Pusat Data Kebon",
+            "Sektor Perumahan Mukti",
+            "Kawasan Industri Kreatif",
+            "Pusat Pemerintahan",
+            "Hub Transportasi Terpadu"
+        };
+    }
+
+    // Fungsi menambah jalur timbal balik (Undirected Graph)
+    void addEdge(int u, int v, int weight) {
+        adj[u].push_back(make_pair(weight, v));
+        adj[v].push_back(make_pair(weight, u));
+    }
+
+    // 1. IMPLEMENTASI ALGORITMA DIJKSTRA (Kasus Rute Ambulans)
+    void findShortestPath(int start, int target) {
+        // Min-Heap untuk mengambil jarak terkecil: pair<jarak_total, vertex>
+        priority_queue<pii, vector<pii>, greater<pii>> pq;
+        
+        // Array jarak diinisialisasi dengan nilai tak hingga (1e9)
+        vector<int> dist(V, 1e9);
+        
+        // Array parent digunakan untuk melacak balik rute yang dilewati
+        vector<int> parent(V, -1);
+
+        // Mulai dari titik asal
+        dist[start] = 0;
+        pq.push(make_pair(0, start));
+
+        while (!pq.empty()) {
+            int u = pq.top().second;
+            int d = pq.top().first;
+            pq.pop();
+
+            // Jika jarak di antrean lebih besar dari yang tercatat, abaikan
+            if (d > dist[u]) continue;
+
+            // Evaluasi semua tetangga dari u
+            for (auto neighbor : adj[u]) {
+                int v = neighbor.second;
+                int weight = neighbor.first;
+
+                // Proses Relaksasi Jalur
+                if (dist[u] + weight < dist[v]) {
+                    dist[v] = dist[u] + weight;
+                    parent[v] = u; // Catat bahwa v paling cepat dicapai lewat u
+                    pq.push(make_pair(dist[v], v));
+                }
+            }
+        }
+
+        // Cetak Hasil Rute Terpendek
+        cout << "\n==================================================\n";
+        cout << "MASALAH 2: RUTE AMBULANS TERCEPAT (DIJKSTRA)\n";
+        cout << "==================================================\n";
+        cout << "Asal    : " << locationNames[start] << "\n";
+        cout << "Tujuan  : " << locationNames[target] << "\n";
+        cout << "Jarak   : " << dist[target] << " Kilometer\n";
+        
+        // Melacak jalur mundur dari target ke start menggunakan array parent
+        cout << "Rute    : ";
+        vector<int> path;
+        for (int curr = target; curr != -1; curr = parent[curr]) {
+            path.push_back(curr);
+        }
+        for (int i = path.size() - 1; i >= 0; i--) {
+            cout << locationNames[path[i]];
+            if (i > 0) cout << " -> ";
+        }
+        cout << "\n";
+    }
+
+    // 2. IMPLEMENTASI ALGORITMA PRIM (Kasus Jaringan Internet Kabel)
+    void calculateMinimumKabel(int startVertex) {
+        // Min-Heap untuk mengambil bobot kabel termurah: pair<bobot, vertex>
+        priority_queue<pii, vector<pii>, greater<pii>> pq;
+        
+        vector<int> key(V, 1e9);     // Mencatat bobot minimum ke MST
+        vector<bool> inMST(V, false); // Penanda apakah lokasi sudah terhubung kabel
+        vector<int> parent(V, -1);    // Mencatat dari mana kabel ditarik
+        int totalBiaya = 0;
+
+        // Mulai dari lokasi acuan awal
+        key[startVertex] = 0;
+        pq.push(make_pair(0, startVertex));
+
+        cout << "\n==================================================\n";
+        cout << "MASALAH 1: PENGGELARAN KABEL FIBER OPTIC (PRIM'S MST)\n";
+        cout << "==================================================\n";
+        cout << "Urutan pemasangan kabel:\n";
+
+        while (!pq.empty()) {
+            int u = pq.top().second;
+            int weight = pq.top().first;
+            pq.pop();
+
+            // Cek duplikasi antrean
+            if (inMST[u]) continue;
+
+            // Masukkan ke dalam jaringan terintegrasi (MST)
+            inMST[u] = true;
+            totalBiaya += weight;
+
+            // Tampilkan kabel yang berhasil ditanam (kecuali titik pertama)
+            if (u != startVertex) {
+                cout << "- Tarik kabel dari [" << locationNames[parent[u]] 
+                     << "] ke [" << locationNames[u] 
+                     << "] (Biaya: " << weight << " Miliar)\n";
+            }
+
+            // Periksa seluruh lokasi tetangga yang belum terhubung kabel
+            for (auto neighbor : adj[u]) {
+                int v = neighbor.second;
+                int weight_uv = neighbor.first;
+
+                // Jika jalur ini lebih murah dari opsi kabel v sebelumnya
+                if (!inMST[v] && weight_uv < key[v]) {
+                    key[v] = weight_uv;
+                    parent[v] = u; // Kabel ke v akan ditarik dari u
+                    pq.push(make_pair(key[v], v));
+                }
+            }
+        }
+        cout << "--------------------------------------------------\n";
+        cout << "Total Anggaran Minimum Pembangunan: " << totalBiaya << " Miliar Rupiah\n";
+    }
+};
+
+int main() {
+    // Inisialisasi graf Smart City dengan 5 lokasi (0 sampai 4)
+    SmartCityGraph city(5);
+
+    // Mendaftarkan peta jalur potensial sesuai skenario studi kasus
+    city.addEdge(0, 1, 2); // Pusat Data - Perumahan (2)
+    city.addEdge(0, 3, 6); // Pusat Data - Pemkot (6)
+    city.addEdge(1, 2, 3); // Perumahan - Ind. Kreatif (3)
+    city.addEdge(1, 3, 8); // Perumahan - Pemkot (8)
+    city.addEdge(1, 4, 5); // Perumahan - Hub Transportasi (5)
+    city.addEdge(2, 4, 7); // Ind. Kreatif - Hub Transportasi (7)
+    city.addEdge(3, 4, 9); // Pemkot - Hub Transportasi (9)
+
+    // Eksekusi Masalah 1: Menggelar kabel internet ke semua titik dengan biaya terkecil
+    city.calculateMinimumKabel(0);
+
+    // Eksekusi Masalah 2: Mencari jalur tercepat ambulans dari Pusat Data (0) ke Hub Transportasi (4)
+    city.findShortestPath(0, 4);
+
+    return 0;
+}
+```
+OUTPUT:
+```
+==================================================
+MASALAH 1: PENGGELARAN KABEL FIBER OPTIC (PRIM'S MST)
+==================================================
+Urutan pemasangan kabel:
+- Tarik kabel dari [Pusat Data Kebon] ke [Sektor Perumahan Mukti] (Biaya: 2 Miliar)
+- Tarik kabel dari [Sektor Perumahan Mukti] ke [Kawasan Industri Kreatif] (Biaya: 3 Miliar)
+- Tarik kabel dari [Sektor Perumahan Mukti] ke [Hub Transportasi Terpadu] (Biaya: 5 Miliar)
+- Tarik kabel dari [Pusat Data Kebon] ke [Pusat Pemerintahan] (Biaya: 6 Miliar)
+--------------------------------------------------
+Total Anggaran Minimum Pembangunan: 16 Miliar Rupiah
+
+==================================================
+MASALAH 2: RUTE AMBULANS TERCEPAT (DIJKSTRA)
+==================================================
+Asal    : Pusat Data Kebon
+Tujuan  : Hub Transportasi Terpadu
+Jarak   : 7 Kilometer
+Rute    : Pusat Data Kebon -> Sektor Perumahan Mukti -> Hub Transportasi Terpadu
+```
+
+---
+
+# Kesimpulan Besar: Studi Graf dan Implementasi Algoritma
+
+Graf merupakan salah satu struktur data non-linear paling kuat dalam ilmu komputer karena kemampuannya memodelkan hubungan kompleks antar objek di dunia nyata—mulai dari sistem jaringan komputer, peta transportasi, hingga interaksi sosial.
+
+Berikut adalah poin-poin kesimpulan kunci dari seluruh materi dan studi kasus yang telah dipelajari:
+
+---
+
+## 1. Fondasi Utama Struktur Graf
+* **Komponen Dasar:** Graf dibentuk oleh pasangan $G = (V, E)$, di mana **Vertex ($V$)** adalah objek/titik penanda, dan **Edge ($E$)** adalah jalur/garis penghubung relasi.
+* **Efisiensi Representasi:** Struktur data **Adjacency List (Daftar Keketanggaan)** adalah pilihan terbaik untuk menghemat ruang memori komputer pada graf *sparse* (graf yang memiliki sedikit jalur penghubung dibanding total titiknya), karena memori hanya dialokasikan untuk jalur-jalur yang benar-benar eksis.
+
+---
+
+## 2. Esensi Traversal Graf (Penelusuran)
+Sebelum melakukan optimasi jarak atau biaya, kita harus memahami cara menelusuri graf secara terstruktur agar tidak terjebak dalam siklus (perulangan tanpa akhir):
+* **Breadth-First Search (BFS):** Menelusuri graf secara **melebar** level-by-level menggunakan bantuan antrean (**Queue**). Sangat efektif untuk mencari jumlah lompatan paling sedikit.
+* **Depth-First Search (DFS):** Menelusuri graf secara **mendalam** menyusuri satu jalur sampai buntu sebelum mundur (*backtrack*) menggunakan bantuan tumpukan (**Stack** / Rekursi).
+
+---
+
+## 3. Perbandingan Dua Mahkota Algoritma Graf: Dijkstra vs Prim
+Studi kasus *Smart City* membuktikan secara nyata bahwa **graf berbobot yang sama akan menghasilkan subset jalur yang sangat berbeda** tergantung pada tujuan optimasinya. 
+
+Berikut adalah perbedaan radikal antara Shortest Path (Dijkstra) dan Minimum Spanning Tree (Prim):
+
+| Parameter | Shortest Path (Algoritma Dijkstra) | Minimum Spanning Tree (Algoritma Prim) |
+| :--- | :--- | :--- |
+| **Fokus Utama** | Optimasi rute **titik-ke-titik** (*Point-to-Point*). | Optimasi **konektivitas global** seluruh graf (*Global Connectivity*). |
+| **Tujuan Akhir** | Mencari akumulasi bobot (jarak/waktu) terkecil khusus dari **satu lokasi asal menuju satu lokasi tujuan**. | Menghubungkan **seluruh lokasi** tanpa terkecuali dengan total akumulasi bobot (biaya/kabel) paling minimum. |
+| **Bentuk Hasil Akhir** | Sebuah jalur linear (*Path*) tunggal dari asal ke tujuan. | Sebuah pohon rentang (*Tree*) terhubung yang mencakup semua vertex dan **bebas dari siklus/loop**. |
+| **Batasan Khusus** | Semua bobot jalur **wajib bernilai positif** (tidak boleh ada nilai negatif). | Graf harus berupa **Undirected Graph** (tidak berarah) dan saling terhubung (*connected*). |
+| **Analogi Skenario** | Menentukan rute tercepat **Ambulans/Google Maps** dari rumah ke rumah sakit. | Menggelar infrastruktur **pipa air bersih / kabel listrik** ke semua rumah di suatu kompleks dengan biaya paling murah. |
+
+---
+
+## 4. Filosofi Desain Kode
+Kedua algoritma tingkat lanjut ini (Dijkstra dan Prim) memiliki kesamaan dalam pola pikir *greedy* (memilih opsi terbaik yang ada di depan mata saat itu juga). Oleh karena itu, dalam implementasi kode pemrograman (seperti C++), keduanya sama-sama memanfaatkan struktur data **Priority Queue (Min-Heap)** untuk mengekstrak jalur dengan bobot terkecil secara instan demi menjaga performa algoritma agar tetap cepat dan efisien.
