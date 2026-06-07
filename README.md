@@ -108,3 +108,11 @@ Vertex 1 terhubung dengan: [ 0 2 3 ]
 Vertex 2 terhubung dengan: [ 0 1 ]
 Vertex 3 terhubung dengan: [ 1 ]
 ```
+
+Penjelasan Kode Langkah demi Langkah:
+1. `vector<vector<int>> adjList;:` Kita menggunakan struktur data vector dinamis dari pustaka C++. Baris luar bertindak sebagai baris vertex utama, dan elemen di dalamnya bertindak sebagai daftar tetangga dinamis.
+2. `adjList.resize(vertices);:` Fungsi ini mengalokasikan ruang memori awal di memori agar kita bisa mengakses indeks dari 0 sampai vertices - 1 tanpa terjadi error out of bounds.
+3. `void addEdge(int src, int dest):` Fungsi ini menerima dua parameter, yaitu titik asal (`src`) dan titik tujuan (`dest`). Karena contoh ini adalah graf tidak berarah, kita melakukan dua operasi `push_back:` memasukkan `dest` ke dalam list milik `src`, dan memasukkan `src` ke dalam list milik `dest`. Jika Anda ingin membuat graf berarah, Anda cukup menghapus baris kedua (`adjList[dest].push_back(src);`).
+4. `printGraph():` Kita menggunakan perulangan bersarang (nested loop). Perulangan pertama menyusuri setiap vertex utama, dan perulangan kedua (berbasis range-based for loop) mencetak seluruh tetangga yang terhubung dengan vertex tersebut.
+---
+
